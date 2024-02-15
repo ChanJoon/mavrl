@@ -1,0 +1,17 @@
+src/learning/AvoidBench/
+src/learning/vae*/
+src/learning/saved/
+src/learning/mav_baselines.egg-info/
+src/learning/build/
+src/learning/exp_dir/
+src/learning/datasets/
+src/avoidbench/
+src/ThirdP/
+src/build/
+build/
+devel/
+logs/
+*.bag
+.catkin_tools/
+.vscode/
+src/agilicious/agilib/externals/

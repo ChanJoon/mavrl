@@ -48,13 +48,13 @@ def main():
   if args.scene_id == 0:
     cfg = YAML().load(
         open(
-            os.environ["AVOIDBENCH_PATH"] + "/../learning/configs/control/config_new.yaml", "r"
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_new.yaml", "r"
         )
     )
   else:
     cfg = YAML().load(
         open(
-            os.environ["AVOIDBENCH_PATH"] + "/../learning/configs/control/config_new_out.yaml", "r"
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_new_out.yaml", "r"
         )
     )
 
@@ -78,8 +78,8 @@ def main():
   time.sleep(1.0)
   save_finished = True
 
-  logdir = os.environ["AVOIDBENCH_PATH"] + "/../learning"
-  weight = os.environ["AVOIDBENCH_PATH"] + "/../learning/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
+  logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl"
+  weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
   device = get_device("auto")
   saved_variables = torch.load(weight, map_location=device)
   # print(saved_variables["state_dict"])
@@ -129,7 +129,7 @@ def main():
   model.setup_eval()
   for i in range(24, num_policy):
     ctl_iter = 20*(i+1)
-    weight = os.environ["AVOIDBENCH_PATH"] + "/../learning/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, ctl_iter)
+    weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, ctl_iter)
     print("Testing policy at iter {0}".format(ctl_iter))
     saved_variables = torch.load(weight, map_location=device)
     model.change_policy(saved_variables["state_dict"])

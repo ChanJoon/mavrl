@@ -26,7 +26,7 @@ def main():
     rsg_root = os.path.dirname(os.path.abspath(__file__))
     log_dir = rsg_root + "/saved"
     device = get_device("auto")
-    weight = os.environ["AVOIDBENCH_PATH"] + "/../learning/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
+    weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
     device = get_device("auto")
     saved_variables = torch.load(weight, map_location=device)
     # print(saved_variables["state_dict"])
@@ -41,7 +41,7 @@ def main():
     policy.to(device)
     print(args.recon)
 
-    logdir = os.environ["AVOIDBENCH_PATH"] + "/../learning/exp_dir"
+    logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/exp_dir"
     vae_file = join(logdir, 'vae', 'best.tar')
     assert exists(vae_file), "No trained VAE in the logdir..."
     state_vae = torch.load(vae_file)

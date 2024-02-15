@@ -65,13 +65,13 @@ def main():
   if args.scene_id == 0:
     cfg = YAML().load(
         open(
-            os.environ["AVOIDBENCH_PATH"] + "/../learning/configs/control/config_new.yaml", "r"
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_new.yaml", "r"
         )
     )
   else:
     cfg = YAML().load(
         open(
-            os.environ["AVOIDBENCH_PATH"] + "/../learning/configs/control/config_new_out.yaml", "r"
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_new_out.yaml", "r"
         )
     )
 
@@ -123,7 +123,7 @@ def main():
     save_finished = True    
 
   if (args.retrain or not args.train):
-    weight = os.environ["AVOIDBENCH_PATH"] + "/../learning/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
+    weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
     saved_variables = torch.load(weight, map_location=device)
     # Create policy object
     policy = MultiInputLstmPolicy(features_dim=64, **saved_variables["data"])

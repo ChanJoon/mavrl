@@ -61,7 +61,7 @@ def main():
     # load configurations
     cfg = YAML().load(
         open(
-            os.environ["AVOIDBENCH_PATH"] + "/../learning/configs/control/config_dataset_outdoor.yaml", "r"
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_dataset_outdoor.yaml", "r"
         )
     )
 

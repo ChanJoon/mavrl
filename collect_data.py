@@ -52,7 +52,7 @@ def main():
   # load configurations
   cfg = YAML().load(
       open(
-          os.environ["AVOIDBENCH_PATH"] + "/../learning/configs/control/config_lstm.yaml", "r"
+          os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_lstm.yaml", "r"
       )
   )
 
@@ -103,7 +103,7 @@ def main():
     save_finished = True
 
     if not args.retrain:
-      logdir = os.environ["AVOIDBENCH_PATH"] + "/../learning"
+      logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl"
       vae_file = join(logdir, 'vae_64_new', 'best.tar')
       assert exists(vae_file), "No trained VAE in the logdir..."
       state_vae = torch.load(vae_file)
@@ -113,7 +113,7 @@ def main():
       state_vae = None
 
   if (args.retrain or not args.train):
-    weight = os.environ["AVOIDBENCH_PATH"] + "/../learning/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
+    weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
     device = get_device("auto")
     saved_variables = torch.load(weight, map_location=device)
     # print(saved_variables["state_dict"])

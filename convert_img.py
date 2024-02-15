@@ -17,7 +17,7 @@ def convertPNG(pngfile,outdir):
     print(outdir)
     print(os.path.basename(pngfile))
     im.save(os.path.join(outdir,os.path.basename(pngfile)))
-root = os.environ["AVOIDBENCH_PATH"] + "/../learning/saved/LSTM_0/Reconstruction/Sequence_0"
+root = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/LSTM_0/Reconstruction/Sequence_0"
 dirs = [
     join(root, sd)
     for sd in listdir(root) if isdir(join(root, sd))]

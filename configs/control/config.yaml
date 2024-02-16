@@ -18,6 +18,16 @@ unity:
   range: [20, 38, 9]
   origin: [0.0, 16.5, 4.5]
   res: 0.10
+    
+ros:
+  input_update_freq: 10
+  use_depth: true
+  velocity_frame: wf
+  seq_len: 1
+  goal_obs_dim: 7
+  trial: 201 #200 #30 #114 #109 #110
+  iter: 720 #660 #760 #240 #700 #540
+  pre_steps: 4
   
 drone:
   length: 0.2
@@ -33,6 +43,7 @@ simulation:
   act_max: [4.0, 4.0, 1.0, 0.6]
   act_min: [-4.0, -4.0, -1.0, -0.6]
   reset_if_collide: true
+  use_stereo_vision: true
 
 rewards:
   colli_coeff: -0.00 # reward coefficient for position
@@ -61,7 +72,7 @@ rgb_camera:
   width: 256
   height: 256
   fov: 70.0
-  enable_depth: yes 
+  enable_depth: no 
   enable_segmentation: no
   enable_opticalflow: no
   use_stereo_vision: false

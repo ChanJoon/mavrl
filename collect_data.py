@@ -40,6 +40,7 @@ def parser():
   parser.add_argument("--trial", type=int, default=1, help="PPO trial number")
   parser.add_argument("--iter", type=int, default=100, help="PPO iter number")
   parser.add_argument("--retrain", type=int, default=1, help="if retrain")
+  parser.add_argument("--scene_id", type=int, default=0, help="indoor")
   parser.add_argument("--rollouts", type=int, default=1000, help="Number of rollouts")
   parser.add_argument("--dir", type=str, default="./datasets",
                       help="Where to place rollouts")
@@ -50,11 +51,18 @@ def parser():
 def main():
   args = parser().parse_args()
   # load configurations
-  cfg = YAML().load(
-      open(
-          os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_lstm.yaml", "r"
-      )
-  )
+  if args.scene_id == 0:
+    cfg = YAML().load(
+        open(
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_lstm_indoor.yaml", "r"
+        )
+    )
+  else:
+    cfg = YAML().load(
+        open(
+            os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config_lstm.yaml", "r"
+        )
+    )
 
   train_env = AvoidVisionEnv_v1(dump(cfg, Dumper=RoundTripDumper), False)
   train_env = wrapper.VisionEnvVec(train_env, logdir=args.logdir)
@@ -165,6 +173,7 @@ def main():
       states_dim=0,
       reconstruction_members=[False, False, True],
       save_lstm_dateset=True,
+      is_forest_env=(args.scene_id==1),
     )
     #
     model.learn_lstm(total_timesteps=int(4e7), log_interval=(10, 10))

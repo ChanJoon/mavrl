@@ -17,14 +17,14 @@ from utils.misc import LSIZE, RED_SIZE
 ## WARNING : THIS SHOULD BE REPLACE WITH PYTORCH 0.5
 from utils.learning import EarlyStopping
 from utils.learning import ReduceLROnPlateau
-from data.loaders import RolloutObservationDataset
+from data.loaders import _RolloutDataset
 
 parser = argparse.ArgumentParser(description='VAE Trainer')
 parser.add_argument('--batch-size', type=int, default=8, metavar='N',
                     help='input batch size for training (default: 32)')
 parser.add_argument('--epochs', type=int, default=1000, metavar='N',
                     help='number of epochs to train (default: 1000)')
-parser.add_argument('--logdir', type=str, help='Directory where results are logged')
+parser.add_argument('--logdir', type=str,  default='exp_vae', help='Directory where results are logged')
 parser.add_argument('--noreload', action='store_true',
                     help='Best model is not reloaded if specified')
 parser.add_argument('--nosamples', action='store_true',
@@ -55,14 +55,14 @@ transform_test = transforms.Compose([
     transforms.ToTensor(),
 ])
 
-dataset_train = RolloutObservationDataset('datasets',
+dataset_train = _RolloutDataset('saved/lstm_dataset',
                                           transform_train, train=True)
-dataset_test = RolloutObservationDataset('datasets',
+dataset_test = _RolloutDataset('saved/lstm_dataset',
                                          transform_test, train=False)
 train_loader = torch.utils.data.DataLoader(
-    dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=2)
+    dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=1)
 test_loader = torch.utils.data.DataLoader(
-    dataset_test, batch_size=args.batch_size, shuffle=True, num_workers=2)
+    dataset_test, batch_size=args.batch_size, shuffle=True, num_workers=1)
 
 
 model = VAE(1, LSIZE).to(device)

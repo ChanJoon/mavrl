@@ -184,6 +184,27 @@ class RecurrentPPO(OnPolicyAlgorithm):
 
         if self.retrain:
             self.policy = policy
+            if self.state_vae is not None:
+                pretrained_cnn = {
+                    'features_extractor.conv1.weight': self.state_vae['state_dict']['encoder.conv1.weight'],
+                    'features_extractor.conv1.bias': self.state_vae['state_dict']['encoder.conv1.bias'],
+                    'features_extractor.conv2.weight': self.state_vae['state_dict']['encoder.conv2.weight'],
+                    'features_extractor.conv2.bias': self.state_vae['state_dict']['encoder.conv2.bias'],
+                    'features_extractor.conv3.weight': self.state_vae['state_dict']['encoder.conv3.weight'],
+                    'features_extractor.conv3.bias': self.state_vae['state_dict']['encoder.conv3.bias'],
+                    'features_extractor.conv4.weight': self.state_vae['state_dict']['encoder.conv4.weight'],
+                    'features_extractor.conv4.bias': self.state_vae['state_dict']['encoder.conv4.bias'],
+                    'features_extractor.conv5.weight': self.state_vae['state_dict']['encoder.conv5.weight'],
+                    'features_extractor.conv5.bias': self.state_vae['state_dict']['encoder.conv5.bias'],
+                    'features_extractor.conv6.weight': self.state_vae['state_dict']['encoder.conv6.weight'],
+                    'features_extractor.conv6.bias': self.state_vae['state_dict']['encoder.conv6.bias'],
+                    'features_extractor.linear.weight': self.state_vae['state_dict']['encoder.fc_mu.weight'],
+                    'features_extractor.linear.bias': self.state_vae['state_dict']['encoder.fc_mu.bias'],
+                    'features_extractor.fc_logsigma.weight': self.state_vae['state_dict']['encoder.fc_logsigma.weight'],
+                    'features_extractor.fc_logsigma.bias': self.state_vae['state_dict']['encoder.fc_logsigma.bias'],
+                }
+                self.policy.load_state_dict(pretrained_cnn, strict=False)
+                self.policy = self.policy.to(self.device)
 
         if self.train_lstm_without_env:
             self.dataset_train = RolloutLSTMSequenceDataset(self.lstm_dataset_path, self.device, train=True)
@@ -197,27 +218,8 @@ class RecurrentPPO(OnPolicyAlgorithm):
             self.set_random_seed(self.seed)
             lstm_logger = utils.configure_logger(self.verbose, self.tensorboard_log, lstm_weight_saved_path, False)
             self.set_logger(lstm_logger)
+            
         elif self.fine_tune_from_rosbag:
-            pretrained_cnn = {
-                'features_extractor.conv1.weight': self.state_vae['state_dict']['encoder.conv1.weight'],
-                'features_extractor.conv1.bias': self.state_vae['state_dict']['encoder.conv1.bias'],
-                'features_extractor.conv2.weight': self.state_vae['state_dict']['encoder.conv2.weight'],
-                'features_extractor.conv2.bias': self.state_vae['state_dict']['encoder.conv2.bias'],
-                'features_extractor.conv3.weight': self.state_vae['state_dict']['encoder.conv3.weight'],
-                'features_extractor.conv3.bias': self.state_vae['state_dict']['encoder.conv3.bias'],
-                'features_extractor.conv4.weight': self.state_vae['state_dict']['encoder.conv4.weight'],
-                'features_extractor.conv4.bias': self.state_vae['state_dict']['encoder.conv4.bias'],
-                'features_extractor.conv5.weight': self.state_vae['state_dict']['encoder.conv5.weight'],
-                'features_extractor.conv5.bias': self.state_vae['state_dict']['encoder.conv5.bias'],
-                'features_extractor.conv6.weight': self.state_vae['state_dict']['encoder.conv6.weight'],
-                'features_extractor.conv6.bias': self.state_vae['state_dict']['encoder.conv6.bias'],
-                'features_extractor.linear.weight': self.state_vae['state_dict']['encoder.fc_mu.weight'],
-                'features_extractor.linear.bias': self.state_vae['state_dict']['encoder.fc_mu.bias'],
-                'features_extractor.fc_logsigma.weight': self.state_vae['state_dict']['encoder.fc_logsigma.weight'],
-                'features_extractor.fc_logsigma.bias': self.state_vae['state_dict']['encoder.fc_logsigma.bias'],
-            }
-            self.policy.load_state_dict(pretrained_cnn, strict=False)
-            self.policy = self.policy.to(self.device)
             self.dataset_train = RosbagSequenceDataset('real_imgs', '/camera/depth/image_rect_raw', transform=None, train=True)
             self.dataset_test  = RosbagSequenceDataset('real_imgs', '/camera/depth/image_rect_raw', transform=None, train=False)
             self.train_loader = torch.utils.data.DataLoader(

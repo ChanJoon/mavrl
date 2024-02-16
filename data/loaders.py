@@ -12,7 +12,7 @@ import cv2
 import random
 
 class _RolloutDataset(torch.utils.data.Dataset): # pylint: disable=too-few-public-methods
-    def __init__(self, root, transform, buffer_size=200, train=True): # pylint: disable=too-many-arguments
+    def __init__(self, root, transform, buffer_size=400, train=True): # pylint: disable=too-many-arguments
         self._transform = transform
 
         self._files = [
@@ -23,7 +23,7 @@ class _RolloutDataset(torch.utils.data.Dataset): # pylint: disable=too-few-publi
         random.shuffle(self._files)
         # print(self._files)
         if train:
-            self._files = self._files[:-10]
+            self._files = self._files[0:150]
         else:
             self._files = self._files[-10:]
 

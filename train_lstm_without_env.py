@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 from os.path import join, exists
 import torch
 import numpy as np
@@ -31,11 +31,16 @@ def main():
     configure_random_seed(92)
     rsg_root = os.path.dirname(os.path.abspath(__file__))
     log_dir = rsg_root + "/saved"
-    print(log_dir)
+
+    vae_logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/exp_vae/"
+    vae_file = join(vae_logdir, 'vae_64_new', 'best.tar')
+    assert exists(vae_file), "No trained VAE in the logdir..."
+    state_vae = torch.load(vae_file)
+    print("Loading VAE at epoch {} "
+        "with test error {}".format(state_vae['epoch'], state_vae['precision']))
+    
     device = get_device("auto")
-    print(device)
     weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
-    print(weight)
     saved_variables = torch.load(weight, map_location=device)
     # Create policy object
     saved_variables["data"]['only_lstm_training'] = True
@@ -70,6 +75,7 @@ def main():
         retrain=args.retrain,
         verbose=1,
         only_lstm_training=True,
+        state_vae=state_vae,
         states_dim=0,
         reconstruction_members=args.recon,
         reconstruction_steps=10,

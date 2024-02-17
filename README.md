@@ -9,6 +9,19 @@ Many existing obstacle avoidance algorithms overlook the crucial balance between
 ## 2.1 Install AvoidBench
 Please refer to [AvoidBench](https://github.com/tudelft/AvoidBench) and check the dependency of installation. Run the following commands to setup:
 ``` bash
+# install Open3D
+sudo apt update
+sudo apt install git libtool build-essential cmake
+git clone --recursive -b v0.9.0 https://github.com/isl-org/Open3D.git
+cd Open3D
+mkdir build
+cd build
+cmake ..
+make -j
+sudo make install
+```
+
+``` bash
 sudo apt update
 sudo apt install libzmqpp-dev libopencv-dev unzip python3-catkin-tools
 sudo apt install libgoogle-glog-dev protobuf-compiler ros-noetic-octomap-msgs ros-noetic-octomap-ros python3-vcstool

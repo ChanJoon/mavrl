@@ -50,3 +50,8 @@ Train an initial policy:
 cd AvoidBench/src/mavrl/
 python train_policy --retrain 0 --train 1 --scene_id 1 # scene_id=0: indoor warehouse, scene_id=1: outdoor forest
 ```
+We suggest to train around 200 iterations and use the last weight file as initial policy. Then use the initial policy to collect datasets for perception part:
+``` bash
+python collect_data.py --trial 1 --iter 200 --scene_id 1
+```
+where trial=1 and iter=200 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_00200.pth```. Set different ```--scene``` to get both indoor and outdoor data.

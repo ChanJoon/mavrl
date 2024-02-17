@@ -7,3 +7,20 @@ Many existing obstacle avoidance algorithms overlook the crucial balance between
 # 2. Installation
 
 ## 2.1 Install AvoidBench
+Please refer to [AvoidBench](https://github.com/tudelft/AvoidBench) and check the dependency of installation. Run the following commands to setup:
+``` bash
+sudo apt update
+sudo apt install libzmqpp-dev libopencv-dev unzip python3-catkin-tools
+sudo apt install libgoogle-glog-dev protobuf-compiler ros-noetic-octomap-msgs ros-noetic-octomap-ros python3-vcstool
+git clone git@github.com:tudelft/AvoidBench.git
+cd AvoidBench
+git checkout mavrl_version
+echo "export AVOIDBENCH_PATH=path_to_this_project/AvoidBench/src/avoidbench" >> ~/.bashrc
+```
+
+## 2.1 Install MAVRL
+Get the mavrl ros package:
+``` bashs
+cd AvoidBench/src
+git clone git@github.com:tudelft/mavrl.git
+```

@@ -54,4 +54,4 @@ We suggest to train around 200 iterations and use the last weight file as initia
 ``` bash
 python collect_data.py --trial 1 --iter 200 --scene_id 1
 ```
-where trial=1 and iter=200 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_00200.pth```. Set different ```--scene``` to get both indoor and outdoor data.
+where trial=1 and iter=200 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_00200.pth```. Set different ```--scene_id``` to get both indoor and outdoor data.

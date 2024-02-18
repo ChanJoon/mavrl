@@ -68,4 +68,11 @@ Load VAE and LSTM training result and retrain the policy:
 ```bash
 python train_policy.py --retrain 1 --trial 1 --iter 1950 --scene_id 1 --nocontrol 1
 ```
-where trial=1 and iter=1950 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_01950.pth```, make sure to change the output folder name ```LSTM_xxx_x_0``` to ```RecurrrntPPO_x``` before retrain the policy
+where trial=1 and iter=1950 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_01950.pth```, make sure to change the output folder name ```LSTM_xxx_x_0``` to ```RecurrrntPPO_x``` before retrain the policy. The argument ````--nocontrol``` decide if load the initial policy or train the policy from random set policy network.
+
+# 3. Test and Benchmarking
+## 3.1 Policy Test without dynamics and controller
+
+```bash
+python test_ppo.py --trial 2 --iter 20 --scene_id 1
+```

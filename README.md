@@ -55,3 +55,13 @@ We suggest to train around 200 iterations and use the last weight file as initia
 python collect_data.py --trial 1 --iter 200 --scene_id 1
 ```
 where trial=1 and iter=200 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_00200.pth```. Set different ```--scene_id``` to get both indoor and outdoor data.
+Train Variational AutoEncoder (VAE):
+``` bash
+python trainvae.py
+```
+Make sure you have built a folder ```exp_vae``` in ```mavrl```. Then load VAE and train LSTM:
+``` bash
+python train_lstm_without_env.py --trial 1 --iter 200 --recon 1 1 0 --lstm_exp LSTM_110_0
+```
+where trial=1 and iter=200 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_00200.pth```. The argument ```recon``` deicde if reconstruct past, current, and future depth or not. ```--recon 1 1 0``` means reconstructing past and current depth. ```lstm_exp``` defines the output folder name of LSTM training.
+

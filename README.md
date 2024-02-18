@@ -64,4 +64,8 @@ Make sure you have built a folder ```exp_vae``` in ```mavrl```. Then load VAE an
 python train_lstm_without_env.py --trial 1 --iter 200 --recon 1 1 0 --lstm_exp LSTM_110_0
 ```
 where trial=1 and iter=200 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_00200.pth```. The argument ```recon``` deicde if reconstruct past, current, and future depth or not. ```--recon 1 1 0``` means reconstructing past and current depth. ```lstm_exp``` defines the output folder name of LSTM training.
-
+Load VAE and LSTM training result and retrain the policy:
+```bash
+python train_policy.py --retrain 1 --trial 1 --iter 1950 --scene_id 1 --nocontrol 1
+```
+where trial=1 and iter=1950 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_01950.pth```, make sure to change the output folder name ```LSTM_xxx_x_0``` to ```RecurrrntPPO_x``` before retrain the policy

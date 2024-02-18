@@ -37,6 +37,20 @@ Get the mavrl ros package:
 cd AvoidBench/src
 git clone git@github.com:tudelft/mavrl.git
 ```
+Create conda environment:
+```
+cd mavrl
+conda env create -f environment.yaml
+```
+Install reinforcement learning environment:
+```
+cd avoidbench/avoidlib/
+mkdir build
+cd build
+cmake ..
+make -j
+pip install .
+```
 
 # 3. Training
 Our pipeline comprises three main components: the VAE, LSTM, and PPO. The training process is as following:
@@ -75,4 +89,10 @@ where trial=1 and iter=1950 means to load the weight from ```saved/RecurrentPPO_
 
 ```bash
 python test_ppo.py --trial 2 --iter 20 --scene_id 1
+```
+
+## 3.2 Test on AvoidBench
+```
+cd AvoidBench
+catkin build
 ```

@@ -73,7 +73,8 @@ Train Variational AutoEncoder (VAE):
 ``` bash
 python trainvae.py
 ```
-Make sure you have built a folder ```exp_vae``` in ```mavrl```. Then load VAE and train LSTM:
+Make sure you have built a folder ```exp_vae``` in ```mavrl```. You can also download the VAE weight file from [here](https://data.4tu.nl/file/a21231b6-f867-40df-962d-27f9dc25f57a/37a56e7d-0e19-48b2-9eb2-1e6457213c28) that we already trained.
+Then load VAE and train LSTM:
 ``` bash
 python train_lstm_without_env.py --trial 1 --iter 200 --recon 1 1 0 --lstm_exp LSTM_110_0
 ```

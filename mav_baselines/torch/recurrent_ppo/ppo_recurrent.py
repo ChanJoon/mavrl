@@ -1163,11 +1163,12 @@ class RecurrentPPO(OnPolicyAlgorithm):
             observations = {key: obs.cpu().numpy() for (key, obs) in rollout_data.observations.items()}
             lstm_states = (rollout_data.lstm_states.pi[0].cpu().numpy(), rollout_data.lstm_states.pi[1].cpu().numpy())
             episode_starts = rollout_data.episode_starts.cpu().numpy()
+            actions = rollout_data.actions.cpu().numpy()
             # save the rollout data to the file
             save_path = self.logger.get_dir()
             os.makedirs(save_path, exist_ok=True)
             np.savez(save_path + "/rollout_{0:05d}.npz".format(iteration), observations=observations, 
-                     lstm_states=lstm_states, episode_starts=episode_starts)
+                     lstm_states=lstm_states, episode_starts=episode_starts, actions=actions)
 
 
     def lstm_loss_function(self, obs, obs_recon, n_seq, epoch):

@@ -142,3 +142,7 @@ source devel/setup.bash
 roscd mavrl
 python avoider_vel_cmd.py
 ```
+
+<p align="center">
+  <img src="https://github.com/tudelft/mavrl/blob/main/imgs/sim.gif"/>
+</p>

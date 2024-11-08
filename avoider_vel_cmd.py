@@ -59,13 +59,6 @@ class RobotState:
         # self.vel_world = self.body2world(self.vel)
         # print("acc: {0}, acc_world: {1}".format(self.acc, acc_world))
         # print("body vel: {0}, world vel: {1}".format(self.vel, self.vel_world))
-
-    # def body2world(self, body):
-    #     rot = R.from_euler('zyx', [self.yaw, 0, 0], degrees=False)
-    #     world_flu = np.array(rot.apply(body))
-    #     # FLU to RFU
-    #     world_rfu = np.array([-world_flu[1], world_flu[0], world_flu[2]])
-    #     return world_rfu
     def body2world(self, body):
         rot = R.from_quat(self.quat)
         world_flu = np.array(rot.apply(body))
@@ -88,7 +81,7 @@ class AvoiderNode:
         self.bridge = CvBridge()
         self.config = YAML().load(
             open(
-                os.environ["AVOIDER_PATH"] + "/../learning/configs/control/config.yaml", "r"
+                os.environ["AVOIDER_PATH"] + "/../mavrl/configs/control/config.yaml", "r"
             )
         )
         self.robot = RobotState(self.config)
@@ -198,7 +191,7 @@ class AvoiderNode:
         self.net_inputs = new_dict
 
     def create_policy(self):
-        weight = os.environ["AVOIDER_PATH"] + "/../learning/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(self.trial, self.iter)
+        weight = os.environ["AVOIDER_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(self.trial, self.iter)
         saved_varables = torch.load(weight, map_location=self.device)
         saved_varables["data"]['reconstruction_members']=[True, True, False]
         self.policy = MultiInputLstmPolicy(features_dim=64, **saved_varables["data"])
@@ -255,26 +248,15 @@ class AvoiderNode:
         end_time = time.time()
         self.time_cost_pub.publish(Float32(end_time - start_time))
         # visualize prediction
-        recons = self.policy.predict_img(self.lstm_states[0].reshape((1, -1)))
-        if (recons[1] is not None) and (recons[0] is not None):
-            imgs = np.hstack([(recons[0].reshape([256, 256, 1]) * 255).astype(np.uint8), (recons[1].reshape([256, 256, 1]) * 255).astype(np.uint8)])
-            cv2.imshow("recon", imgs)
-            cv2.waitKey(1)
-        elif (recons[1] is not None):
-            imgs = (recons[1].reshape([256, 256, 1]) * 255).astype(np.uint8)
-            cv2.imshow("recon", imgs)
-            cv2.waitKey(1)
-
-        # self.robot.step(self.act_np, 1.0 / self.input_update_freq)
-        # vel_cmd = self.robot.get_vel_cmd()
-        # vel_msg = TwistStamped()
-        # vel_msg.header.stamp = rospy.Time.now()
-        # vel_msg.header.frame_id = 'world'
-        # vel_msg.twist.linear.x = vel_cmd[0]
-        # vel_msg.twist.linear.y = vel_cmd[1]
-        # vel_msg.twist.linear.z = vel_cmd[2]
-        # vel_msg.twist.angular.z = vel_cmd[3]
-        # self.vel_pub.publish(vel_msg)
+        # recons = self.policy.predict_img(self.lstm_states[0].reshape((1, -1)))
+        # if (recons[1] is not None) and (recons[0] is not None):
+        #     imgs = np.hstack([(recons[0].reshape([256, 256, 1]) * 255).astype(np.uint8), (recons[1].reshape([256, 256, 1]) * 255).astype(np.uint8)])
+        #     cv2.imshow("recon", imgs)
+        #     cv2.waitKey(1)
+        # elif (recons[1] is not None):
+        #     imgs = (recons[1].reshape([256, 256, 1]) * 255).astype(np.uint8)
+        #     cv2.imshow("recon", imgs)
+        #     cv2.waitKey(1)
 
     def send_command(self, data):
         if self.act_np is None:

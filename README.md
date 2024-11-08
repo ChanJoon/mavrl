@@ -97,13 +97,48 @@ where trial=1 and iter=1950 means to load the weight from ```saved/RecurrentPPO_
 
 # 3. Test and Benchmarking
 ## 3.1 Policy Test without dynamics and controller
-
+Start a terminal and run unity standalone
+``` bash
+cd AvoidBench/src/avoidbench/unity_scene/
+./AvoidBench/AvoidBench.x86_64
+```
+Run the evaluation environments
 ```bash
 python test_ppo.py --trial 2 --iter 20 --scene_id 1
 ```
 
 ## 3.2 Test on AvoidBench
+Before run the network for benchmarking, please mention the checkpoint which you trained before in the config file [config.yaml](https://github.com/tudelft/mavrl/blob/main/configs/control/config.yaml)
+```
+ros:
+  input_update_freq: 10
+  use_depth: true
+  velocity_frame: wf
+  seq_len: 1
+  goal_obs_dim: 7
+  trial: 2 # if you want to load the checkpoint for the file of 'Recurrent_2'
+  iter: 200 # if you want to load the checkpoint named as 'iter_00600.pth'
+  pre_steps: 4
+```
+Compile AvoidBench
 ```
 cd AvoidBench
 catkin build
+```
+Start AvoidBench:
+```
+source devel/setup.bash
+# run the launch file
+roslaunch avoid_manage rotors_gazebo.launch
+```
+Open another terminal, start controller from agilicous:
+```
+source devel/setup.bash
+roslaunch mavrl flying_hummingbird.launch
+```
+Open another terminal, run network inference:
+```
+source devel/setup.bash
+roscd mavrl
+python avoider_vel_cmd.py
 ```

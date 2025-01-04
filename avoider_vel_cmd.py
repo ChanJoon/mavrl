@@ -14,7 +14,10 @@ from geometry_msgs.msg import TwistStamped
 from scipy.spatial.transform import Rotation as R
 from ruamel.yaml import YAML
 from stable_baselines3.common.utils import get_device
-from rpg_baselines_prev.torch.recurrent_ppo.policies import MultiInputLstmPolicy
+from mav_baselines.torch.recurrent_ppo.policies import MultiInputLstmPolicy
+import mav_baselines
+import sys
+sys.modules['rpg_baselines_prev'] = mav_baselines
 
 class RobotState:
     def __init__(self, cfg, dim=4) -> None:
@@ -81,7 +84,7 @@ class AvoiderNode:
         self.bridge = CvBridge()
         self.config = YAML().load(
             open(
-                os.environ["AVOIDER_PATH"] + "/../mavrl/configs/control/config.yaml", "r"
+                os.environ["AVOIDBENCH_PATH"] + "/../mavrl/configs/control/config.yaml", "r"
             )
         )
         self.robot = RobotState(self.config)
@@ -191,7 +194,7 @@ class AvoiderNode:
         self.net_inputs = new_dict
 
     def create_policy(self):
-        weight = os.environ["AVOIDER_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(self.trial, self.iter)
+        weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(self.trial, self.iter)
         saved_varables = torch.load(weight, map_location=self.device)
         saved_varables["data"]['reconstruction_members']=[True, True, False]
         self.policy = MultiInputLstmPolicy(features_dim=64, **saved_varables["data"])

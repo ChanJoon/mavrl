@@ -25,8 +25,8 @@ ros:
   velocity_frame: wf
   seq_len: 1
   goal_obs_dim: 7
-  trial: 2 # if you want to load the checkpoint for the file of 'Recurrent_2'
-  iter: 200 # if you want to load the checkpoint named as 'iter_00600.pth'
+  trial: 1 # if you want to load the checkpoint for the file of 'Recurrent_1'
+  iter: 640 # if you want to load the checkpoint named as 'iter_00640.pth'
   pre_steps: 4
   
 drone:

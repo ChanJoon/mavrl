@@ -48,6 +48,11 @@ Create conda environment:
 cd mavrl
 conda env create -f environment.yaml
 ```
+Install mav_baselines:
+```
+cd mavrl
+pip install .
+```
 Install reinforcement learning environment:
 ```
 conda activate mavrl

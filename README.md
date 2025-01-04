@@ -50,6 +50,7 @@ conda env create -f environment.yaml
 ```
 Install reinforcement learning environment:
 ```
+conda activate mavrl
 cd avoidbench/avoidlib/build
 cmake ..
 make -j

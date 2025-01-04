@@ -31,7 +31,7 @@ sudo apt install libzmqpp-dev libopencv-dev unzip python3-catkin-tools
 sudo apt install libgoogle-glog-dev protobuf-compiler ros-noetic-octomap-msgs ros-noetic-octomap-ros python3-vcstool
 git clone git@github.com:tudelft/AvoidBench.git
 cd AvoidBench/src/avoidbench/unity_scene/
-wget https://data.4tu.nl/file/a21231b6-f867-40df-962d-27f9dc25f57a/f61dfc92-7659-4637-a355-e119a9ec4ac5
+wget -O AvoidBench.zip https://data.4tu.nl/file/a21231b6-f867-40df-962d-27f9dc25f57a/f61dfc92-7659-4637-a355-e119a9ec4ac5
 unzip -o AvoidBench.zip
 rm AvoidBench.zip
 echo "export AVOIDBENCH_PATH=path_to_this_project/AvoidBench/src/avoidbench" >> ~/.bashrc

@@ -95,6 +95,8 @@ python train_policy.py --retrain 1 --trial 1 --iter 1950 --scene_id 1 --nocontro
 ```
 where trial=1 and iter=1950 means to load the weight from ```saved/RecurrentPPO_1/Policy/iter_01950.pth```, make sure to change the output folder name ```LSTM_xxx_x_0``` to ```RecurrrntPPO_x``` before retrain the policy. The argument ````--nocontrol``` decide if load the initial policy or train the policy from random set policy network.
 
+**We provide the initial obstacle-free policy, VAE, LSTM training results and the dataset [here](https://data.4tu.nl/datasets/a21231b6-f867-40df-962d-27f9dc25f57a), download them if you don't want to train MAVRL from scratch.**
+
 # 4. Test and Benchmarking
 ## 4.1 Policy Test without dynamics and controller
 Start a terminal and run unity standalone

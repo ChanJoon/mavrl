@@ -150,6 +150,7 @@ class AvoiderNode:
         vel_body = self.robot.world2body(np.array(state_inputs[3: 6]))
         horizon_vel = np.sqrt(vel_body[0] ** 2 + vel_body[1] ** 2)
         theta = np.arctan2(-delta_p[0], delta_p[1])
+        # theta = np.arctan2(delta_p[1], delta_p[0])
         horizon_vel_dire = np.arctan2(vel_body[1], vel_body[0])
         # print("theta: {0}, horizon_vel_dire: {1}".format(theta, horizon_vel_dire))
         # print("self.robot.yaw: ", self.robot.yaw)
@@ -273,6 +274,7 @@ class AvoiderNode:
         vel_msg.twist.linear.y = vel_cmd[1]
         vel_msg.twist.linear.z = vel_cmd[2]
         vel_msg.twist.angular.z = vel_cmd[3]
+        # print("vel_cmd: ", vel_cmd)
         self.vel_pub.publish(vel_msg)
 
 def main():

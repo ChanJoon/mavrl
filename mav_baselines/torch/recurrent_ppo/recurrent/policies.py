@@ -594,10 +594,15 @@ class RecurrentActorCriticPolicy(ActorCriticPolicy):
             latent_obs = th.tensor(latent_obs, dtype=th.float32, device=self.device)
             latent_obs = self.mu_linear(latent_obs)
             recon_latent_size = self.features_dim + self.states_dim
-            _, _, next_latent_obs = th.split(latent_obs, [recon_latent_size, recon_latent_size, recon_latent_size], dim=1)
-            reconstruction = self.feature_decoder0(next_latent_obs)
-            # convert to numpy
-        return reconstruction.cpu().numpy()
+            pre_latent_obs, cur_latent_obs, next_latent_obs = th.split(latent_obs, [recon_latent_size, recon_latent_size, recon_latent_size], dim=1)
+            total_laten_obs = [pre_latent_obs, cur_latent_obs, next_latent_obs]
+            reconstruction = []
+            for i in range(len(self.reconstruction_members)):
+                if self.reconstruction_members[i]:
+                    reconstruction.append(self.feature_decoder0(total_laten_obs[i]).cpu().numpy())
+                else:
+                    reconstruction.append(None)
+        return reconstruction
 
     def predict_lstm(self, 
         latent_obs: th.Tensor,

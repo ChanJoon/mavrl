@@ -155,7 +155,21 @@ python avoider_vel_cmd.py
   <img src="https://github.com/tudelft/mavrl/blob/main/imgs/sim.gif"/>
 </p>
 
-# 5. Real World Implementation (code for real drone coming soon).
+# 5. Citation
+```
+@ARTICLE{10816139,
+  author={Yu, Hang and Wagter, ChristopheDe and de Croon, Guido C. H. E},
+  journal={IEEE Robotics and Automation Letters}, 
+  title={MAVRL: Learn to Fly in Cluttered Environments With Varying Speed}, 
+  year={2025},
+  volume={10},
+  number={2},
+  pages={1441-1448},
+  keywords={Drones;Long short term memory;Collision avoidance;Training;Reinforcement learning;Image reconstruction;Navigation;Pipelines;Vectors;Complexity theory;Collision avoidance;reinforcement learning;vision-based navigation},
+  doi={10.1109/LRA.2024.3522778}}
+```
+
+# 6. Real World Implementation (code for real drone coming soon).
 
 <p align="center">
   <img src="https://github.com/tudelft/mavrl/blob/main/imgs/zoo.gif"/>

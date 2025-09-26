@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 import numpy as np
 import torch as th
 import warnings
-from gym import spaces
+from gymnasium import spaces
 from functools import partial
 from stable_baselines3.common.distributions import Distribution
 from stable_baselines3.common.policies import ActorCriticPolicy
@@ -86,7 +86,6 @@ class RecurrentActorCriticPolicy(ActorCriticPolicy):
         use_sde: bool = False,
         log_std_init: float = 0.0,
         full_std: bool = True,
-        sde_net_arch: Optional[List[int]] = None,
         use_expln: bool = False,
         squash_output: bool = False,
         features_extractor_class: Type[BaseFeaturesExtractor] = FlattenExtractor,
@@ -110,23 +109,23 @@ class RecurrentActorCriticPolicy(ActorCriticPolicy):
         self.lstm_output_dim = lstm_hidden_size
         self.use_beta = use_beta
         super().__init__(
-            observation_space,
-            action_space,
-            lr_schedule,
-            net_arch,
-            activation_fn,
-            ortho_init,
-            use_sde,
-            log_std_init,
-            full_std,
-            sde_net_arch,
-            use_expln,
-            squash_output,
-            features_extractor_class,
-            features_extractor_kwargs,
-            normalize_images,
-            optimizer_class,
-            optimizer_kwargs,
+            observation_space=observation_space,
+            action_space=action_space,
+            lr_schedule=lr_schedule,
+            net_arch=net_arch,
+            activation_fn=activation_fn,
+            ortho_init=ortho_init,
+            use_sde=use_sde,
+            log_std_init=log_std_init,
+            full_std=full_std,
+            use_expln=use_expln,
+            squash_output=squash_output,
+            features_extractor_class=features_extractor_class,
+            features_extractor_kwargs=features_extractor_kwargs,
+            share_features_extractor=share_features_extractor,
+            normalize_images=normalize_images,
+            optimizer_class=optimizer_class,
+            optimizer_kwargs=optimizer_kwargs,
         )
         self.states_dim = states_dim
         self.features_dim = features_dim
@@ -803,7 +802,6 @@ class RecurrentMultiInputActorCriticPolicy(RecurrentActorCriticPolicy):
         use_sde: bool = False,
         log_std_init: float = 0.0,
         full_std: bool = True,
-        sde_net_arch: Optional[List[int]] = None,
         use_expln: bool = False,
         squash_output: bool = False,
         features_extractor_class: Type[BaseFeaturesExtractor] = Encoder,
@@ -834,7 +832,6 @@ class RecurrentMultiInputActorCriticPolicy(RecurrentActorCriticPolicy):
             use_sde,
             log_std_init,
             full_std,
-            sde_net_arch,
             use_expln,
             squash_output,
             features_extractor_class,

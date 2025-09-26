@@ -14,7 +14,7 @@ import torch.utils.data
 from torch.nn import functional as F
 from torchvision.utils import save_image
 from torchvision import transforms
-from gym import spaces
+from gymnasium import spaces
 from ruamel.yaml import YAML
 from stable_baselines3.common.buffers import RolloutBuffer
 from stable_baselines3.common.callbacks import BaseCallback
@@ -128,6 +128,8 @@ class RecurrentPPO(OnPolicyAlgorithm):
         fine_tune_from_rosbag: bool = False,
         lstm_dataset_path: Optional[str] = None,
         lstm_weight_saved_path: Optional[str] = 'LSTM_weights',
+        trial_id: Optional[int] = None,
+        initial_iteration: Optional[int] = None,
     ):
         super().__init__(
             policy,
@@ -181,6 +183,9 @@ class RecurrentPPO(OnPolicyAlgorithm):
         self.train_lstm_without_env = train_lstm_without_env
         self.lstm_dataset_path = lstm_dataset_path
         self.fine_tune_from_rosbag = fine_tune_from_rosbag
+
+        self.trial_id = trial_id
+        self.initial_iteration = initial_iteration
 
         if self.retrain:
             self.policy = policy
@@ -415,16 +420,24 @@ class RecurrentPPO(OnPolicyAlgorithm):
             with th.no_grad():
                 # Convert to pytorch tensor or to TensorDict
                 obs_tensor = obs_as_tensor(self._last_obs, self.device)
-                episode_starts = th.tensor(self._last_episode_starts, dtype=th.float32, device=self.device)
+                # Ensure episode starts are converted via NumPy to avoid DLPack issues with unsupported dtypes
+                episode_starts_np = np.asarray(self._last_episode_starts, dtype=np.float32)
+                episode_starts = th.as_tensor(episode_starts_np, device=self.device)
                 latent_pi, latent_vf, lstm_states = self.policy.forward_rnn(obs_tensor, lstm_states, episode_starts)
                 actions, values, log_probs = self.policy.forward(latent_pi, latent_vf, deterministic=deterministic)
-            actions = actions.cpu().numpy()
+            actions = actions.cpu().numpy().astype(np.float64, copy=False)
 
             # Rescale and perform action
             clipped_actions = actions
             # Clip the actions to avoid out of bound error
             if isinstance(self.action_space, spaces.Box):
-                clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
+                # ``np.clip`` struggles when low/high are non-NumPy objects (e.g. torch tensors),
+                # so make sure everything is a plain array before clipping.
+                actions_np = np.asarray(actions, dtype=np.float64)
+                low = np.asarray(self.action_space.low, dtype=np.float64)
+                high = np.asarray(self.action_space.high, dtype=np.float64)
+                clipped_actions = np.clip(actions_np, low, high)
+                clipped_actions = np.ascontiguousarray(clipped_actions, dtype=np.float64)
             new_obs, rewards, dones, infos = env.step(clipped_actions)
             self.num_timesteps += env.num_envs
             # print("render time: ", time.time() - t0)
@@ -477,7 +490,7 @@ class RecurrentPPO(OnPolicyAlgorithm):
 
         with th.no_grad():
             # Compute value for the last timestep
-            episode_starts = th.tensor(dones, dtype=th.float32, device=self.device)
+            episode_starts = th.as_tensor(np.asarray(dones, dtype=np.float32), device=self.device)
             values = self.policy.predict_values(obs_as_tensor(new_obs, self.device), lstm_states.vf, episode_starts)
         rollout_buffer.compute_returns_and_advantage(last_values=values, dones=dones)
 
@@ -536,16 +549,21 @@ class RecurrentPPO(OnPolicyAlgorithm):
             with th.no_grad():
                 # Convert to pytorch tensor or to TensorDict
                 obs_tensor = obs_as_tensor(self._last_obs, self.device)
-                episode_starts = th.tensor(self._last_episode_starts, dtype=th.float32, device=self.device)
+                episode_starts_np = np.asarray(self._last_episode_starts, dtype=np.float32)
+                episode_starts = th.as_tensor(episode_starts_np, device=self.device)
                 latent_pi, latent_vf, lstm_states = self.policy.forward_rnn(obs_tensor, lstm_states, episode_starts)
                 actions, values, log_probs = self.policy.forward(latent_pi, latent_vf, deterministic=deterministic)
-            actions = actions.cpu().numpy()
+            actions = actions.cpu().numpy().astype(np.float64, copy=False)
 
             # Rescale and perform action
             clipped_actions = actions
             # Clip the actions to avoid out of bound error
             if isinstance(self.action_space, spaces.Box):
-                clipped_actions = np.clip(actions, self.action_space.low, self.action_space.high)
+                actions_np = np.asarray(actions, dtype=np.float64)
+                low = np.asarray(self.action_space.low, dtype=np.float64)
+                high = np.asarray(self.action_space.high, dtype=np.float64)
+                clipped_actions = np.clip(actions_np, low, high)
+                clipped_actions = np.ascontiguousarray(clipped_actions, dtype=np.float64)
 
             new_obs, rewards, dones, infos = env.step(clipped_actions)
             self.num_timesteps += env.num_envs
@@ -596,7 +614,8 @@ class RecurrentPPO(OnPolicyAlgorithm):
 
         with th.no_grad():
             # Compute value for the last timestep
-            episode_starts = th.tensor(dones, dtype=th.float32, device=self.device)
+            episode_starts_np = np.asarray(dones, dtype=np.float32)
+            episode_starts = th.as_tensor(episode_starts_np, device=self.device)
             values = self.policy.predict_values(obs_as_tensor(new_obs, self.device), lstm_states.vf, episode_starts)
         rollout_buffer.compute_returns_and_advantage(last_values=values, dones=dones)
 
@@ -813,14 +832,10 @@ class RecurrentPPO(OnPolicyAlgorithm):
         iteration = 0
 
         total_timesteps, callback = self._setup_learn(
-            total_timesteps,
-            eval_env,
-            callback,
-            eval_freq,
-            n_eval_episodes,
-            eval_log_path,
-            reset_num_timesteps,
-            tb_log_name,
+            total_timesteps=total_timesteps,
+            callback=callback,
+            reset_num_timesteps=reset_num_timesteps,
+            tb_log_name=tb_log_name,
         )
 
         new_cfg_dir = self.logger.get_dir() + "/config.yaml"
@@ -869,7 +884,8 @@ class RecurrentPPO(OnPolicyAlgorithm):
 
                 policy_path = self.logger.get_dir() + "/Policy"
                 os.makedirs(policy_path, exist_ok=True)
-                self.policy.save(policy_path + "/iter_{0:05d}.pth".format(iteration))
+                checkpoint_path = os.path.join(policy_path, "iter_{0:05d}.pth".format(iteration))
+                self.policy.save(checkpoint_path)
 
                 # self.eval(iteration)
         callback.on_training_end()
@@ -877,9 +893,12 @@ class RecurrentPPO(OnPolicyAlgorithm):
         return self
     
     def setup_eval(self) -> None:
-        self._setup_learn(total_timesteps=0,
-                    eval_env=self.eval_env,
-                    tb_log_name="RecurrentPPO_EVAL")
+        self._setup_learn(
+            total_timesteps=0,
+            callback=None,
+            reset_num_timesteps=False,
+            tb_log_name="RecurrentPPO_EVAL",
+        )
     
     def eval_from_outer(self, iteration) -> None:
         self.eval(iteration, if_eval=False, max_ep_length=10000)
@@ -980,9 +999,10 @@ class RecurrentPPO(OnPolicyAlgorithm):
             if epoch % 10 == 0:
                 self.test_lstm_from_dataset(epoch)
             if epoch % 20 == 0:
-                policy_path =self.logger.get_dir() + "/Policy"
+                policy_path = self.logger.get_dir() + "/Policy"
                 os.makedirs(policy_path, exist_ok=True)
-                self.policy.save(self.logger.get_dir() + "/Policy" + "/iter_{0:05d}.pth".format(epoch))
+                checkpoint_path = os.path.join(policy_path, "iter_{0:05d}.pth".format(epoch))
+                self.policy.save(checkpoint_path)
     
     def train_lstm_from_dataset(self):
         # train for n_epochs epochs
@@ -1032,9 +1052,10 @@ class RecurrentPPO(OnPolicyAlgorithm):
             if epoch % 10 == 0:
                 self.test_lstm_from_dataset(epoch)
             if epoch % 50 == 0:
-                policy_path =self.logger.get_dir() + "/Policy"
+                policy_path = self.logger.get_dir() + "/Policy"
                 os.makedirs(policy_path, exist_ok=True)
-                self.policy.save(self.logger.get_dir() + "/Policy" + "/iter_{0:05d}.pth".format(epoch))
+                checkpoint_path = os.path.join(policy_path, "iter_{0:05d}.pth".format(epoch))
+                self.policy.save(checkpoint_path)
             
     def test_lstm_from_dataset(self, epoch):
         self.policy.eval()
@@ -1234,14 +1255,10 @@ class RecurrentPPO(OnPolicyAlgorithm):
     ):
         iteration = 0
         total_timesteps, callback = self._setup_learn(
-            total_timesteps,
-            eval_env,
-            callback,
-            eval_freq,
-            n_eval_episodes,
-            eval_log_path,
-            reset_num_timesteps,
-            tb_log_name,
+            total_timesteps=total_timesteps,
+            callback=callback,
+            reset_num_timesteps=reset_num_timesteps,
+            tb_log_name=tb_log_name,
         )
         callback.on_training_start(locals(), globals())
 
@@ -1261,7 +1278,8 @@ class RecurrentPPO(OnPolicyAlgorithm):
                 if log_interval is not None and iteration % log_interval[1] == 0:
                     policy_path = self.logger.get_dir() + "/Policy"
                     os.makedirs(policy_path, exist_ok=True)
-                    self.policy.save(policy_path + "/iter_{0:05d}.pth".format(iteration))
+                    checkpoint_path = os.path.join(policy_path, "iter_{0:05d}.pth".format(iteration))
+                    self.policy.save(checkpoint_path)
                     self.eval_lstm(iteration)
 
             else:
@@ -1269,4 +1287,3 @@ class RecurrentPPO(OnPolicyAlgorithm):
                 self.save_lstm_rollout(iteration)
 
             callback.on_training_end()
-

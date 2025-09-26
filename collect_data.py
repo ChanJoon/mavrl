@@ -114,7 +114,7 @@ def main():
       logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl"
       vae_file = join(logdir, 'vae_64_new', 'best.tar')
       assert exists(vae_file), "No trained VAE in the logdir..."
-      state_vae = torch.load(vae_file)
+      state_vae = torch.load(vae_file, weights_only=False)
       print("Loading VAE at epoch {} "
           "with test error {}".format(state_vae['epoch'], state_vae['precision']))
     else:
@@ -123,7 +123,7 @@ def main():
   if (args.retrain or not args.train):
     weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
     device = get_device("auto")
-    saved_variables = torch.load(weight, map_location=device)
+    saved_variables = torch.load(weight, map_location=device, weights_only=False)
     # print(saved_variables["state_dict"])
     # Create policy object
     saved_variables["data"]['only_lstm_training'] = True
@@ -180,4 +180,3 @@ def main():
 
 if __name__ == "__main__":
   main()
-

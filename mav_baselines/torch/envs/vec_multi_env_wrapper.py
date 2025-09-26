@@ -4,9 +4,9 @@ import time
 from copy import deepcopy
 from typing import Any, Callable, List, Optional, Sequence, Type, Union
 from PIL import Image
-import gym
+import gymnasium as gym
 import numpy as np
-from gym import spaces
+from gymnasium import spaces
 from numpy.core.fromnumeric import shape
 from stable_baselines3.common.running_mean_std import RunningMeanStd
 from stable_baselines3.common.vec_env.base_vec_env import (VecEnv,
@@ -37,11 +37,11 @@ class VisionEnvVec(VecEnv):
                     low=0,
                     high=255,
                     shape=(n_seq, 256, 256),
-                    dtype='uint8',
+                    dtype=np.uint8,
                 ),
                 'state': spaces.Box(
-                    np.ones([n_seq, self.goal_obs_dim]) * -np.Inf,
-                    np.ones([n_seq, self.goal_obs_dim]) * np.Inf,
+                    np.ones([n_seq, self.goal_obs_dim]) * -np.inf,
+                    np.ones([n_seq, self.goal_obs_dim]) * np.inf,
                     dtype=np.float64,
                 )
             }
@@ -71,11 +71,11 @@ class VisionEnvVec(VecEnv):
         self._reward_components = np.zeros(
             [self.num_envs, n_seq, self.rew_dim], dtype=np.float64
         )
-        self._done = np.zeros((self.num_envs, n_seq), dtype=np.bool)
+        self._done = np.zeros((self.num_envs, n_seq), dtype=bool)
         self._single_reward_components = np.zeros(
             [self.num_envs, self.rew_dim], dtype=np.float64
         )
-        self._single_done = np.zeros((self.num_envs), dtype=np.bool)
+        self._single_done = np.zeros((self.num_envs), dtype=bool)
 
         self._extraInfoNames = self.wrapper.getExtraInfoNames()
         self.reward_names = self.wrapper.getRewardNames()

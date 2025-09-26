@@ -1,3 +1,29 @@
+## Environment Compatibility Update
+
+This forked repository has been **modified and tested** to support the latest hardware and software environment:
+
+### Verified Configuration
+```yaml
+GPU:               NVIDIA GeForce RTX 5080
+Compute Capability: 12.0
+Driver Version:    570.172.08
+CUDA Toolkit:      12.8 (V12.8.93)
+Python:            3.10 (Conda)
+PyTorch:           2.10.0.dev20250924+cu128
+NumPy:             2.1.2
+Gym:               0.26.2
+Stable-Baselines3: 2.3.2
+Gymnasium:         0.29.1
+```
+
+### Key Modifications
+- **Updated dependencies** for compatibility with CUDA 12.8 toolkit
+- **Optimized for RTX 50 series GPUs** with compute capability 12.0
+- **Migrated to PyTorch nightly builds** to leverage latest GPU features
+- **Tested and verified** all training and inference pipelines
+
+---
+
 # MAVRL
 MAVRL: Learn to Fly in Cluttered Environments with Varying Speed
 

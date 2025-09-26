@@ -1,21 +1,76 @@
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
-from typing import Dict, List, Tuple, Type, Union
+from typing import Dict, List, Tuple, Type, Union, Optional
 
-import gym
+import gymnasium as gym
 import torch as th
 from torch import nn
+import warnings
 
 from stable_baselines3.common.preprocessing import get_flattened_obs_dim, is_image_space
 from stable_baselines3.common.type_aliases import TensorDict
 from stable_baselines3.common.utils import get_device
 
-class Encoder(BaseFeaturesExtractor):
-    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 64):
 
-        image_observation_space = None
+def _get_image_observation_space(
+    observation_space: gym.spaces.Space,
+    image_key: Optional[str] = None,
+) -> gym.spaces.Box:
+    """Select an image-like Box subspace from the observation space.
+
+    Preference order:
+    1) If ``image_key`` is provided and exists, return it.
+    2) First subspace recognized by SB3 as image via ``is_image_space``.
+    3) First 3D Box subspace (with a warning) as a fallback.
+    Raises a ValueError if nothing suitable is found.
+    """
+
+    # Dict observation: try provided key, then auto-detect
+    if isinstance(observation_space, gym.spaces.Dict):
+        if image_key and image_key in observation_space.spaces:
+            return observation_space.spaces[image_key]
         for key, subspace in observation_space.spaces.items():
             if is_image_space(subspace):
-                image_observation_space = subspace
+                return subspace
+        for key, subspace in observation_space.spaces.items():
+            if isinstance(subspace, gym.spaces.Box) and subspace.shape is not None and len(subspace.shape) == 3:
+                warnings.warn(
+                    (
+                        "Observation key '{0}' is not recognised as an image by"
+                        " stable-baselines3; treating it as channels-first"
+                        " image for the recurrent encoder."
+                    ).format(key),
+                    stacklevel=2,
+                )
+                return subspace
+        raise ValueError(
+            "Encoder expects at least one image-like Box space in the Dict"
+            f" observation space; available keys: {list(observation_space.spaces.keys())}"
+        )
+
+    # Single Box observation
+    if isinstance(observation_space, gym.spaces.Box) and observation_space.shape is not None and len(observation_space.shape) == 3:
+        if not is_image_space(observation_space):
+            warnings.warn(
+                "Observation space is treated as an image although it is not"
+                " recognised as such by stable-baselines3 (check dtype/bounds).",
+                stacklevel=2,
+            )
+        return observation_space
+
+    # Nothing suitable found
+    raise ValueError(
+        "Encoder expects an image-like gym.spaces.Box with 3 dimensions (C, H, W)"
+        " or a Dict containing such a subspace."
+    )
+
+class Encoder(BaseFeaturesExtractor):
+    def __init__(
+        self,
+        observation_space: gym.spaces.Space,
+        features_dim: int = 64,
+        image_key: Optional[str] = None,
+    ):
+        image_observation_space = _get_image_observation_space(observation_space, image_key=image_key)
         super(Encoder, self).__init__(image_observation_space, features_dim)
         n_input_channels = image_observation_space.shape[0]
         self.conv1 = nn.Conv2d(n_input_channels, 8, kernel_size=4, stride=2)
@@ -45,11 +100,14 @@ class Encoder(BaseFeaturesExtractor):
         return mu
     
 class Decoder(nn.Module):
-    def __init__(self, observation_space: gym.spaces.Box, lstm_hidden_dim: int = 64) -> None:
+    def __init__(
+        self,
+        observation_space: gym.spaces.Space,
+        lstm_hidden_dim: int = 64,
+        image_key: Optional[str] = None,
+    ) -> None:
         super(Decoder, self).__init__()
-        for key, subspace in observation_space.spaces.items():
-            if is_image_space(subspace):
-                image_observation_space = subspace
+        image_observation_space = _get_image_observation_space(observation_space, image_key=image_key)
         n_input_channels = image_observation_space.shape[0]
         self.fc = nn.Linear(lstm_hidden_dim, 2*2*256)
         self.deconv1 = nn.ConvTranspose2d(2*2*256, 128, kernel_size=5, stride=2)

@@ -61,6 +61,12 @@ def parser():
 
 def main():
   args = parser().parse_args()
+  print("[TrainPolicy] trial={0} | iter={1} | train={2} | retrain={3}".format(
+      args.trial,
+      args.iter,
+      bool(args.train),
+      bool(args.retrain)
+  ), flush=True)
   # load configurations
   if args.scene_id == 0:
     cfg = YAML().load(
@@ -80,6 +86,14 @@ def main():
   # set random seed
   configure_random_seed(args.seed, env=train_env)
 
+  # Debug: print action space info for train env
+  try:
+    print("[TrainPolicy] train_env action_space: ", train_env.action_space,
+          getattr(train_env.action_space, 'shape', None),
+          getattr(train_env.action_space, 'dtype', None), flush=True)
+  except Exception as e:
+    print("[TrainPolicy] train_env action_space print failed:", e, flush=True)
+
   # create evaluation environment
   old_num_envs = cfg["simulation"]["num_envs"]
   old_render = cfg["unity"]["render"]
@@ -91,6 +105,14 @@ def main():
   cfg["simulation"]["num_envs"] = old_num_envs
   cfg["unity"]["render"] = old_render
   eval_env.wrapper.setUnityFromPtr(train_env.wrapper.getUnityPtr())
+
+  # Debug: print action space info for eval env
+  try:
+    print("[TrainPolicy] eval_env action_space:  ", eval_env.action_space,
+          getattr(eval_env.action_space, 'shape', None),
+          getattr(eval_env.action_space, 'dtype', None), flush=True)
+  except Exception as e:
+    print("[TrainPolicy] eval_env action_space print failed:", e, flush=True)
 
   # eval_env.getPointClouds('', 0, False)
   # save the configuration and other files
@@ -124,6 +146,9 @@ def main():
 
   if (args.retrain or not args.train):
     weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
+    print("[TrainPolicy] Resolving weight file at {0}".format(weight), flush=True)
+    if not exists(weight):
+      print("[TrainPolicy] WARNING: weight file not found at {0}".format(weight), flush=True)
     saved_variables = torch.load(weight, map_location=device)
     # Create policy object
     policy = MultiInputLstmPolicy(features_dim=64, **saved_variables["data"])
@@ -152,14 +177,17 @@ def main():
     policy = "MultiInputLstmPolicy"
 
   if args.train:
+    log_interval = (10, 20)
+    checkpoint_every = log_interval[1] if isinstance(log_interval, tuple) and len(log_interval) > 1 else None
     model = RecurrentPPO(
       tensorboard_log=log_dir,
       policy=policy,
       policy_kwargs=dict(
           activation_fn=torch.nn.ReLU,
-          net_arch=[dict(pi=[256, 256], vf=[512, 512])],
+          net_arch=dict(pi=[256, 256], vf=[512, 512]),
           log_std_init=-0.5,
           use_beta = False,
+          features_extractor_kwargs=dict(image_key='image'),
       ),
       env=train_env,
       learning_rate=learning_rate_schedule,
@@ -184,13 +212,16 @@ def main():
       features_dim=64,
       if_change_maps=True,
       is_forest_env=(args.scene_id==1),
+      trial_id=args.trial,
+      initial_iteration=args.iter,
     )
     #
-    model.learn(total_timesteps=int(8e6), log_interval=(10, 20))
+    if checkpoint_every:
+      print("[TrainPolicy] Checkpoints will be saved every {0} iterations".format(checkpoint_every), flush=True)
+    model.learn(total_timesteps=int(8e6), log_interval=log_interval)
     
   else:
     test_vision_policy(eval_env, policy)
 
 if __name__ == "__main__":
   main()
-

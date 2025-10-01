@@ -149,7 +149,7 @@ def main():
     print("[TrainPolicy] Resolving weight file at {0}".format(weight), flush=True)
     if not exists(weight):
       print("[TrainPolicy] WARNING: weight file not found at {0}".format(weight), flush=True)
-    saved_variables = torch.load(weight, map_location=device)
+    saved_variables = torch.load(weight, map_location=device, weights_only=False)
     # Create policy object
     policy = MultiInputLstmPolicy(features_dim=64, **saved_variables["data"])
     #

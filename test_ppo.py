@@ -81,7 +81,7 @@ def main():
   logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl"
   weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
   device = get_device("auto")
-  saved_variables = torch.load(weight, map_location=device)
+  saved_variables = torch.load(weight, map_location=device, weights_only=False)
   # print(saved_variables["state_dict"])
   # Create policy object
   saved_variables["data"]['shared_lstm'] = True
@@ -131,7 +131,7 @@ def main():
     ctl_iter = 20*(i+1)
     weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, ctl_iter)
     print("Testing policy at iter {0}".format(ctl_iter))
-    saved_variables = torch.load(weight, map_location=device)
+    saved_variables = torch.load(weight, map_location=device, weights_only=False)
     model.change_policy(saved_variables["state_dict"])
     model.eval_from_outer(ctl_iter)
 

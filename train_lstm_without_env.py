@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from os.path import join, exists
 import torch
 import numpy as np
@@ -33,15 +33,16 @@ def main():
     log_dir = rsg_root + "/saved"
 
     vae_logdir = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/exp_vae/"
-    vae_file = join(vae_logdir, 'vae_64_new', 'best.tar')
+    # vae_file = join(vae_logdir, 'vae_64_new', 'best.tar')
+    vae_file = join(vae_logdir, 'vae', 'best.tar')
     assert exists(vae_file), "No trained VAE in the logdir..."
-    state_vae = torch.load(vae_file)
+    state_vae = torch.load(vae_file, weights_only=False)
     print("Loading VAE at epoch {} "
         "with test error {}".format(state_vae['epoch'], state_vae['precision']))
     
     device = get_device("auto")
     weight = os.environ["AVOIDBENCH_PATH"] + "/../mavrl/saved/RecurrentPPO_{0}/Policy/iter_{1:05d}.pth".format(args.trial, args.iter)
-    saved_variables = torch.load(weight, map_location=device)
+    saved_variables = torch.load(weight, map_location=device, weights_only=False)
     # Create policy object
     saved_variables["data"]['only_lstm_training'] = True
     policy = MultiInputLstmPolicy(features_dim=64, 
